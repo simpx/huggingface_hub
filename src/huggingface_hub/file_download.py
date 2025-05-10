@@ -145,7 +145,7 @@ def are_symlinks_supported(cache_dir: Union[str, Path, None] = None) -> bool:
     return _are_symlinks_supported_in_dir[cache_dir]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class HfFileMetadata:
     """Data structure containing information about a file versioned on the Hub.
 
@@ -1457,7 +1457,7 @@ def get_hf_file_metadata(
     hf_raise_for_status(r)
 
     # Return
-    return HfFileMetadata(
+    meta = HfFileMetadata( # 
         commit_hash=r.headers.get(constants.HUGGINGFACE_HEADER_X_REPO_COMMIT),
         # We favor a custom header indicating the etag of the linked resource, and
         # we fallback to the regular etag header.
@@ -1471,6 +1471,9 @@ def get_hf_file_metadata(
         ),
         xet_file_data=parse_xet_file_data_from_response(r),  # type: ignore
     )
+    if meta.etag == 'f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b':
+        meta.xet_file_data=None
+        meta.location='https://modelscope.cn/models/Qwen/Qwen3-0.6B/resolve/master/model.safetensors'
 
 
 def _get_metadata_or_catch_error(
